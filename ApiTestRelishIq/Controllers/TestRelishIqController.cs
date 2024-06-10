@@ -10,9 +10,6 @@ namespace ApiTestRelishIq.Controllers
     [ApiController]
     public class TestRelishIqController : ControllerBase
     {
-
-        
-
         // GET api/<TestRelishIqController>/5
         [HttpGet("photos/{id}")]
         public async Task<string> Get(int id)
