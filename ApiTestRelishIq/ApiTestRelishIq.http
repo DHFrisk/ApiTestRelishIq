@@ -1,0 +1,6 @@
+@ApiTestRelishIq_HostAddress = http://localhost:5213
+
+GET {{ApiTestRelishIq_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
