@@ -1,0 +1,19 @@
+﻿@model IEnumerable<WebpageTestRelishIq.Models.UnifiedDataModel.Photo>
+
+@{
+    ViewData["Title"] = "Gallery";
+}
+
+<h1>Gallery</h1>
+
+@foreach (var item in Model) {
+        <div class="row">
+            <div class="card col-md-3">
+                    <img class="card-img-top" src="@item.thumbnailUrl" alt="Card image cap">
+                    <h5 class="card-title">Photo title: @item.title</h5>
+                    <p class="card-text">Album title: @item.album.title</p>
+                    <p class="card-text">User name: @item.album.user.name</p>
+            </div>
+            <br/>
+        </div>
+}

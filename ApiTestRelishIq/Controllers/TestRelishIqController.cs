@@ -194,14 +194,13 @@ namespace ApiTestRelishIq.Controllers
 
 
 
-        #region idk i was tired
+        #region Photos
 
         // Get photos by title coincidence
         [NonAction]
         public async Task<string> GetPhotosByTitle(string title)
         {
             List<PhotoModel> photos = new List<PhotoModel>();
-            //List<PhotoModel> filteredPhotos = new List<PhotoModel>();
             IEnumerable<PhotoModel> filteredPhotos;
             List<UnifiedDataModel.Photo> filteredPhotos2 = new List<UnifiedDataModel.Photo>();
 
@@ -251,6 +250,51 @@ namespace ApiTestRelishIq.Controllers
             return null;
         }
 
+        [HttpGet("all")]
+        public async Task<string> GetAllPhotos()
+        {
+            List<PhotoModel> photos = new List<PhotoModel>();
+            IEnumerable<PhotoModel> filteredPhotos;
+            List<UnifiedDataModel.Photo> filteredPhotos2 = new List<UnifiedDataModel.Photo>();
+
+            try
+            {
+                // Get all pictures
+                this.request = new HttpRequestMessage(
+                    HttpMethod.Get,
+                    Constants.Constants.urlPhotos
+                    );
+
+                this.response = await this.client.SendAsync(request);
+
+                if (this.response == null || !this.response.IsSuccessStatusCode)
+                {
+                    throw new Exception("Error while getting data!");
+                }
+
+                var streamResponse = await this.response.Content.ReadAsStreamAsync();
+                photos = JsonSerializer.Deserialize<List<PhotoModel>>(streamResponse);
+
+                for (int i = 0; i < 25; i++)
+                {
+                    PhotoModel photo = photos[i];
+                    filteredPhotos2.Add(JsonSerializer.Deserialize<UnifiedDataModel.Photo>(await this.Get(photo.id)));
+                }
+
+                return JsonSerializer.Serialize(filteredPhotos2);
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return null;
+        }
+
+        #endregion Photos
+
+
+        #region Albums
 
         // Get photos by album title coincidences
         [NonAction]
@@ -320,7 +364,10 @@ namespace ApiTestRelishIq.Controllers
 
         }
 
+        #endregion Albums
 
+        #region Users
+        
         // Get photos by user id
         [NonAction]
         public async Task<string> GetPhotosByUserId(int userId)
@@ -397,7 +444,6 @@ namespace ApiTestRelishIq.Controllers
             List<UserModel> users = new List<UserModel>();
             IEnumerable<int> filteredUsersIds;
             List<PhotoModel> photos = new List<PhotoModel>();
-            //IEnumerable<int> filteredPhotosIds;
             IEnumerable<UnifiedDataModel.Photo> filteredData = new List<UnifiedDataModel.Photo>();
 
             try
@@ -442,6 +488,9 @@ namespace ApiTestRelishIq.Controllers
             return null;
         }
 
+        #endregion Users
+
+
         // Return a new list based on the received (or default) limit and offset
         [NonAction]
         public async Task<string> CutLength(int limit, int offset, List<UnifiedDataModel.Photo> photos)
@@ -463,137 +512,5 @@ namespace ApiTestRelishIq.Controllers
 
             return JsonSerializer.Serialize(filteredPhotos);
         }
-
-
-        #endregion idk i was tired
-
-
-        #region idk i was tired too
-        /*
-         * [NonAction]
-        public async Task<string> GetPhotosByTitle(string title)
-        {
-            try
-            {
-                List<PhotoModel> photos = await this.GetAllPhotos();
-                List<UnifiedDataModel.Photo> data = new List<UnifiedDataModel.Photo>();
-                IEnumerable<UnifiedDataModel.Photo> filteredData;
-
-                foreach (PhotoModel photo in photos)
-                {
-                    data.Add(JsonSerializer.Deserialize<UnifiedDataModel.Photo>(await this.Get(photo.id)));
-                }
-
-                filteredData =
-                    from photo in data
-                    where photo.title == title || photo.title.Contains(title)
-                    select photo;
-
-                return JsonSerializer.Serialize(filteredData);
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            return null;
-        }
-
-        [NonAction]
-        public async Task<string> GetPhotosByAlbumTitle(string title)
-        {
-            try
-            {
-                List<PhotoModel> photos = await this.GetAllPhotos();
-                List<UnifiedDataModel.Photo> data = new List<UnifiedDataModel.Photo>();
-                IEnumerable<UnifiedDataModel.Photo> filteredData;
-
-                foreach (PhotoModel photo in photos)
-                {
-                    data.Add(JsonSerializer.Deserialize<UnifiedDataModel.Photo>(await this.Get(photo.id)));
-                }
-
-                filteredData =
-                    from photo in data
-                    where photo.album.title == title || photo.album.title.Contains(title)
-                    select photo;
-
-                return JsonSerializer.Serialize(filteredData);
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            return null;
-        }
-
-        [NonAction]
-        public async Task<string> GetPhotosByUserEmail(string email)
-        {
-            try
-            {
-                List<PhotoModel> photos = await this.GetAllPhotos();
-                List<UnifiedDataModel.Photo> data = new List<UnifiedDataModel.Photo>();
-                IEnumerable<UnifiedDataModel.Photo> filteredData;
-
-                foreach (PhotoModel photo in photos)
-                {
-                    data.Add(JsonSerializer.Deserialize<UnifiedDataModel.Photo>(await this.Get(photo.id)));
-                }
-
-                filteredData =
-                    from photo in data
-                    where photo.album.user.email == email || photo.album.user.email.Contains(email)
-                    select photo;
-
-                return JsonSerializer.Serialize(filteredData);
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            return null;
-        }
-        
-        [NonAction]
-        public async Task<List<PhotoModel>> GetAllPhotos()
-        {
-            List<PhotoModel> photos = new List<PhotoModel>();
-            //List<PhotoModel> filteredPhotos = new List<PhotoModel>();
-            IEnumerable<PhotoModel> filteredPhotos;
-            List<UnifiedDataModel.Photo> filteredPhotos2 = new List<UnifiedDataModel.Photo>();
-
-            try
-            {
-                // Get all pictures
-                this.request = new HttpRequestMessage(
-                    HttpMethod.Get,
-                    Constants.Constants.urlPhotos
-                    );
-
-                this.response = await this.client.SendAsync(request);
-
-                if (this.response == null || !this.response.IsSuccessStatusCode)
-                {
-                    throw new Exception("Error while getting data!");
-                }
-
-                var streamResponse = await this.response.Content.ReadAsStreamAsync();
-                photos = JsonSerializer.Deserialize<List<PhotoModel>>(streamResponse);
-
-                return photos;
-            }
-            catch (Exception ex)
-            {
-
-            }
-
-            return null;
-        }
-        */
-        
-        #endregion idk i was tired too
     }
 }
