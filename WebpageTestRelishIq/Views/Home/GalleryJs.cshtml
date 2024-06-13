@@ -1,0 +1,27 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+
+
+<script type="text/javascript">
+    async function getPhotos(url) {
+        const response = await fetch(
+            url,
+            {
+                method: "GET",
+            }
+        );
+        return response.json();
+    }
+
+    let btnFilter = document.getElementById("filter");
+    btnFilter.onclick = () => {
+
+    }
+</script>
+
+
+

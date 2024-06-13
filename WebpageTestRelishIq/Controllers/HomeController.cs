@@ -19,26 +19,52 @@ namespace WebpageTestRelishIq.Controllers
             return View();
         }
 
-        
         [HttpGet]
-        public async Task<IActionResult> Gallery(
-            [FromForm] bool allPhotos = true,
-            [FromForm] string photoTitle = "",
-            [FromForm] string albumTitle = "",
-            [FromForm] string userEmail = "",
-            [FromForm] int limit = 25,
-            [FromForm] int offset = 0)
+        public async Task<IActionResult> Gallery()
         {
             List<UnifiedDataModel.Photo> photos;
             HttpClient client = new HttpClient();
             HttpRequestMessage request = new HttpRequestMessage();
             HttpResponseMessage response;
 
-            if (allPhotos)
+            request.Method = HttpMethod.Get;
+            request.RequestUri = new Uri($"{Constants.Constants.apiUrl}/all");
+
+            response = await client.SendAsync(request);
+
+            if (response == null || !response.IsSuccessStatusCode)
             {
-                request.Method = HttpMethod.Get;
-                request.RequestUri = new Uri($"{Constants.Constants.apiUrl}/all");
+                return View("Error");
             }
+
+            var streamResponse = await response.Content.ReadAsStreamAsync();
+            photos = JsonSerializer.Deserialize<List<UnifiedDataModel.Photo>>(streamResponse);
+
+            return View("Gallery", photos);
+        }
+        
+        [HttpGet]
+        public async Task<IActionResult> FilterGallery(
+            string photoTitle = "",
+            string albumTitle = "",
+            string userEmail = "",
+            int limit = 25,
+            int offset = 0)
+        {
+            List<UnifiedDataModel.Photo> photos;
+            HttpClient client = new HttpClient();
+            HttpRequestMessage request = new HttpRequestMessage();
+            HttpResponseMessage response;
+            string apiParameters = string.Empty;
+
+            apiParameters += "limit=" + limit.ToString();
+            apiParameters += "&offset=" + offset.ToString();
+            apiParameters = !string.IsNullOrEmpty(photoTitle) ? apiParameters + "&title=" + photoTitle : apiParameters;
+            apiParameters = !string.IsNullOrEmpty(albumTitle) ? apiParameters + "&album.title=" + albumTitle : apiParameters;
+            apiParameters = !string.IsNullOrEmpty(userEmail) ? apiParameters + "&album.user.email=" + userEmail : apiParameters;
+
+            request.Method = HttpMethod.Get;
+            request.RequestUri = new Uri($"{Constants.Constants.apiUrl}?{apiParameters}");
 
             response = await client.SendAsync(request);
 

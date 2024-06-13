@@ -203,6 +203,8 @@ namespace ApiTestRelishIq.Controllers
             List<PhotoModel> photos = new List<PhotoModel>();
             IEnumerable<PhotoModel> filteredPhotos;
             List<UnifiedDataModel.Photo> filteredPhotos2 = new List<UnifiedDataModel.Photo>();
+            //int middlePoint;
+            //PhotoModel photo = new PhotoModel();
 
             try
             {
@@ -222,13 +224,25 @@ namespace ApiTestRelishIq.Controllers
                 var streamResponse = await this.response.Content.ReadAsStreamAsync();
                 photos = JsonSerializer.Deserialize<List<PhotoModel>>(streamResponse);
 
-                //foreach(PhotoModel photo in photos)
-                //{
-                //    if (photo.title.Contains(title))
-                //    {
-                //        filteredPhotos.Add(photo);
-                //    }
-                //}
+                
+
+                // Failed attempt to implement binary search
+                /*
+                if (offset > photos.Count())
+                {
+                    return JsonSerializer.Serialize("Offset starting position is greater than photos array length!");
+                }
+                middlePoint = this.GetMiddlePoint(photos.Count(), offset);
+
+                for (int i = middlePoint; i < (middlePoint + limit); i++)
+                {
+                    if (i > photos.Count() - 1)
+                        continue;
+
+                    if (photos[i].title.Contains(title))
+                        filteredPhotos2.Add(JsonSerializer.Deserialize<UnifiedDataModel.Photo>(await this.Get(photo.id)));
+                }
+                */
 
                 // I like LINQ :)
                 filteredPhotos =
@@ -305,6 +319,7 @@ namespace ApiTestRelishIq.Controllers
             List<PhotoModel> photos = new List<PhotoModel>();
             IEnumerable<int> filteredPhotosIds;
             List<UnifiedDataModel.Photo> filteredData = new List<UnifiedDataModel.Photo>();
+            //int middlePoint;
 
             try
             {
@@ -342,6 +357,20 @@ namespace ApiTestRelishIq.Controllers
                 streamResponse = await this.response.Content.ReadAsStreamAsync();
                 photos = JsonSerializer.Deserialize<List<PhotoModel>>(streamResponse);
 
+                // Failed attempt to implement binary search
+                /*
+                middlePoint = this.GetMiddlePoint(photos.Count(), offset);
+
+                for (int i = middlePoint; i < (middlePoint + limit); i++)
+                {
+                    if (i > photos.Count() - 1)
+                        continue;
+
+                    if (filteredAlbumsIds.Contains(photos[i].albumId))
+                        filteredData.Add(JsonSerializer.Deserialize<UnifiedDataModel.Photo>(await this.Get(photos[i].id)));
+                }
+                */
+
                 filteredPhotosIds =
                     from photo in photos
                     where filteredAlbumsIds.Contains(photo.albumId)
@@ -367,7 +396,7 @@ namespace ApiTestRelishIq.Controllers
         #endregion Albums
 
         #region Users
-        
+
         // Get photos by user id
         [NonAction]
         public async Task<string> GetPhotosByUserId(int userId)
@@ -377,6 +406,7 @@ namespace ApiTestRelishIq.Controllers
             List<PhotoModel> photos = new List<PhotoModel>();
             IEnumerable<int> filteredPhotosIds;
             List<UnifiedDataModel.Photo> filteredData = new List<UnifiedDataModel.Photo>();
+            int middlePoint;
 
             try
             {
@@ -423,6 +453,20 @@ namespace ApiTestRelishIq.Controllers
                 {
                     filteredData.Add(JsonSerializer.Deserialize<UnifiedDataModel.Photo>(await this.Get(id)));
                 }
+
+                // Failed attempt to implement binary search
+                /*
+                middlePoint = this.GetMiddlePoint(photos.Count(), offset);
+
+                for (int i = middlePoint; i < (middlePoint + limit); i++)
+                {
+                    if (i > photos.Count() - 1)
+                        continue;
+
+                    if (filteredAlbumsIds.Contains(photos[i].albumId))
+                        filteredData.Add(JsonSerializer.Deserialize<UnifiedDataModel.Photo>(await this.Get(photos[i].id)));
+                }
+                */
 
                 return JsonSerializer.Serialize(filteredData);
 
@@ -490,6 +534,48 @@ namespace ApiTestRelishIq.Controllers
 
         #endregion Users
 
+
+        [NonAction]
+        public int GetMiddlePoint(int length, int offset)
+        {
+            int middlePoint, lowerLimit = -1, upperLimit = -1, distance;
+
+            if (offset == 0)
+            {
+                return 0;
+            }
+
+            middlePoint = ((length - 1) % 2 != 0) ? (length - 2) / 2 : length / 2;
+
+            if (middlePoint > offset)
+            {
+                upperLimit = middlePoint;
+                lowerLimit = 0;
+            }
+            else if (middlePoint < offset)
+            {
+                lowerLimit = middlePoint;
+                upperLimit = length - 1;
+            }
+
+            while (middlePoint != offset)
+            {
+                if (middlePoint > offset)
+                {
+                    upperLimit = middlePoint;
+                    distance = upperLimit - lowerLimit;
+                    middlePoint = distance % 2 == 0 ? (lowerLimit + (distance / 2)) : (upperLimit - ((distance - 1) / 2));
+                }
+                else
+                {
+                    lowerLimit = middlePoint;
+                    distance = upperLimit - lowerLimit;
+                    middlePoint = distance % 2 == 0 ? (lowerLimit + (distance / 2)) : (upperLimit - ((distance - 1) / 2));
+                }
+            }
+
+            return middlePoint;
+        }
 
         // Return a new list based on the received (or default) limit and offset
         [NonAction]
