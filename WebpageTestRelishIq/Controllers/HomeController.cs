@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 using System.Text.Json;
 using WebpageTestRelishIq.Models;
+using Amazon.Lambda.APIGatewayEvents;
+//using Newtonsoft.Json;
 
 namespace WebpageTestRelishIq.Controllers
 {
@@ -37,8 +39,9 @@ namespace WebpageTestRelishIq.Controllers
                 return View("Error");
             }
 
-            var streamResponse = await response.Content.ReadAsStreamAsync();
-            photos = JsonSerializer.Deserialize<List<UnifiedDataModel.Photo>>(streamResponse);
+            LambdaFunctionResponseModel streamResponse = JsonSerializer.Deserialize<LambdaFunctionResponseModel>(await response.Content.ReadAsStringAsync());
+
+            photos = JsonSerializer.Deserialize<List<UnifiedDataModel.Photo>>(streamResponse.Result);
 
             return View("Gallery", photos);
         }
@@ -73,8 +76,9 @@ namespace WebpageTestRelishIq.Controllers
                 return View("Error");
             }
 
-            var streamResponse = await response.Content.ReadAsStreamAsync();
-            photos = JsonSerializer.Deserialize<List<UnifiedDataModel.Photo>>(streamResponse);
+            LambdaFunctionResponseModel streamResponse = JsonSerializer.Deserialize<LambdaFunctionResponseModel>(await response.Content.ReadAsStringAsync());
+
+            photos = JsonSerializer.Deserialize<List<UnifiedDataModel.Photo>>(streamResponse.Result);
 
             return View("Gallery", photos);
         }
